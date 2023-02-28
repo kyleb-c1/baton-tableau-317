@@ -20,7 +20,7 @@ type config struct {
 }
 
 // validateConfig is run after the configuration is loaded, and should return an error if it isn't valid.
-// not checking if content-url is missing since it's optional on tableau server
+// not checking if content-url is missing since it's optional on tableau server.
 func validateConfig(ctx context.Context, cfg *config) error {
 	if cfg.AccessTokenSecret == "" {
 		return fmt.Errorf("access token secret is missing")
