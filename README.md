@@ -9,7 +9,6 @@ Check out [Baton](https://github.com/conductorone/baton) to learn more the proje
 2. Personal Access Token Name and Personal Access Token Secret. These are needed to login to the site. You can create them under `My Account Settings - Personal Access Tokens`
 3. Server path parameter. More info [here](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_auth.htm#the-sign-in-uri). 
 4. Site ID (Content URL). More info [here](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_auth.htm#the-site-attribute).
-5. API version number of your own server or Cloud REST API. More info [here](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
 
 
 ## brew
@@ -23,7 +22,7 @@ baton resources
 ## docker
 
 ```
-docker run --rm -v $(pwd):/out -e BATON_SITE_NAME=siteName BATON_SITE_URL=siteUrl BATON_ACCESS_TOKEN_SECRET=accessTokenSecret BATON_ACCESS_TOKEN_NAME=accessTokenName BATON_API_VERSION=apiVersion ghcr.io/conductorone/baton-tableau:latest -f "/out/sync.c1z"
+docker run --rm -v $(pwd):/out -e BATON_SITE_NAME=siteName BATON_SITE_URL=siteUrl BATON_ACCESS_TOKEN_SECRET=accessTokenSecret BATON_ACCESS_TOKEN_NAME=accessTokenName ghcr.io/conductorone/baton-tableau:latest -f "/out/sync.c1z"
 docker run --rm -v $(pwd):/out ghcr.io/conductorone/baton:latest -f "/out/sync.c1z" resources
 ```
 
@@ -33,7 +32,7 @@ docker run --rm -v $(pwd):/out ghcr.io/conductorone/baton:latest -f "/out/sync.c
 go install github.com/conductorone/baton/cmd/baton@main
 go install github.com/conductorone/baton-tableau/cmd/baton-tableau@main
 
-BATON_SITE_NAME=siteName BATON_SITE_URL=siteUrl BATON_ACCESS_TOKEN_SECRET=accessTokenSecret BATON_ACCESS_TOKEN_NAME=accessTokenName BATON_API_VERSION=apiVersion
+BATON_SITE_NAME=siteName BATON_SITE_URL=siteUrl BATON_ACCESS_TOKEN_SECRET=accessTokenSecret BATON_ACCESS_TOKEN_NAME=accessTokenName
 baton resources
 ```
 
@@ -66,7 +65,6 @@ Available Commands:
 Flags:
       --access-token-name string     Name of the personal access token used to connect to the Tableau API. ($BATON_ACCESS_TOKEN_NAME)
       --access-token-secret string   Secret of the personal access token used to connect to the Tableau API. ($BATON_ACCESS_TOKEN_SECRET)
-      --api-version string           API version of your server or Cloud REST API. ($BATON_API_VERSION)
       --content-url string           On server it's referred as Site ID, on Cloud it appears after /site/ in the Browser address bar. ($BATON_CONTENT_URL)
   -f, --file string                  The path to the c1z file to sync with ($BATON_FILE) (default "sync.c1z")
   -h, --help                         help for baton-tableau
