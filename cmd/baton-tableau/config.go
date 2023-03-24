@@ -16,7 +16,6 @@ type config struct {
 	AccessTokenSecret string `mapstructure:"access-token-secret"`
 	ServerPath        string `mapstructure:"server-path"`
 	ContentUrl        string `mapstructure:"content-url"`
-	ApiVersion        string `mapstructure:"api-version"`
 }
 
 // validateConfig is run after the configuration is loaded, and should return an error if it isn't valid.
@@ -31,9 +30,6 @@ func validateConfig(ctx context.Context, cfg *config) error {
 	if cfg.ServerPath == "" {
 		return fmt.Errorf("server path is missing")
 	}
-	if cfg.ApiVersion == "" {
-		return fmt.Errorf("api version is missing")
-	}
 
 	return nil
 }
@@ -44,5 +40,4 @@ func cmdFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("access-token-secret", "", "Secret of the personal access token used to connect to the Tableau API. ($BATON_ACCESS_TOKEN_SECRET)")
 	cmd.PersistentFlags().String("server-path", "", "Base url of your server or Tableau Cloud. ($BATON_SERVER_PATH)")
 	cmd.PersistentFlags().String("content-url", "", "On server it's referred as Site ID, on cloud it appears after /site/ in the Browser address bar. ($BATON_CONTENT_URL)")
-	cmd.PersistentFlags().String("api-version", "", "API version of your server or Cloud REST API.($BATON_API_VERSION)")
 }

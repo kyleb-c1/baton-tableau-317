@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 
 	"github.com/ConductorOne/baton-tableau/pkg/connector"
@@ -38,7 +39,11 @@ func main() {
 
 func getConnector(ctx context.Context, cfg *config) (types.ConnectorServer, error) {
 	l := ctxzap.Extract(ctx)
-	baseUrl := fmt.Sprint("https://", cfg.ServerPath, "/api/", cfg.ApiVersion)
+	baseUrl, err := url.JoinPath("https://", cfg.ServerPath, "/api/3.19")
+	if err != nil {
+		l.Error("error creating base url", zap.Error(err))
+	}
+
 	cb, err := connector.New(ctx, baseUrl, cfg.ContentUrl, cfg.AccessTokenName, cfg.AccessTokenSecret)
 	if err != nil {
 		l.Error("error creating connector", zap.Error(err))

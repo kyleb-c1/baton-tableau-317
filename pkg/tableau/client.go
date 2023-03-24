@@ -106,53 +106,26 @@ func Login(ctx context.Context, baseUrl string, contentUrl string, token string,
 }
 
 // GetSite returns site details of the site user is logged in to.
-func (c *Client) GetSite(ctx context.Context) (Site, *http.Response, error) {
+func (c *Client) GetSite(ctx context.Context) (Site, error) {
 	url := fmt.Sprint(c.baseUrl, "/sites/", c.siteId)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return Site{}, nil, err
-	}
-
-	req.Header.Add("X-Tableau-Auth", fmt.Sprint(c.authToken))
-	req.Header.Add("accept", "application/json")
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return Site{}, nil, err
-	}
-
-	defer resp.Body.Close()
 
 	var res struct {
 		Site Site `json:"site"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
-		return Site{}, nil, err
+	if err := c.doRequest(ctx, url, &res, nil); err != nil {
+		return Site{}, err
 	}
 
-	return res.Site, resp, nil
+	return res.Site, nil
 }
 
 // GetUsers returns all users on site.
 func (c *Client) GetUsers(ctx context.Context, pageSize int, pageNumber int) ([]User, Pagination, error) {
 	url := fmt.Sprint(c.baseUrl, "/sites/", c.siteId, "/users")
 	q := paginationQuery(pageSize, pageNumber)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, Pagination{}, err
-	}
-
-	req.URL.RawQuery = q.Encode()
-	req.Header.Add("X-Tableau-Auth", fmt.Sprint(c.authToken))
-	req.Header.Add("accept", "application/json")
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, Pagination{}, err
-	}
-
-	defer resp.Body.Close()
 
 	var res usersResponse
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+	if err := c.doRequest(ctx, url, &res, q); err != nil {
 		return nil, Pagination{}, err
 	}
 
@@ -163,20 +136,6 @@ func (c *Client) GetUsers(ctx context.Context, pageSize int, pageNumber int) ([]
 func (c *Client) GetGroups(ctx context.Context, pageSize int, pageNumber int) ([]Group, Pagination, error) {
 	url := fmt.Sprint(c.baseUrl, "/sites/", c.siteId, "/groups")
 	q := paginationQuery(pageSize, pageNumber)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, Pagination{}, err
-	}
-
-	req.URL.RawQuery = q.Encode()
-	req.Header.Add("X-Tableau-Auth", fmt.Sprint(c.authToken))
-	req.Header.Add("accept", "application/json")
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, Pagination{}, err
-	}
-
-	defer resp.Body.Close()
 
 	var res struct {
 		Pagination Pagination `json:"pagination"`
@@ -184,7 +143,8 @@ func (c *Client) GetGroups(ctx context.Context, pageSize int, pageNumber int) ([
 			Group []Group `json:"group"`
 		} `json:"groups"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+
+	if err := c.doRequest(ctx, url, &res, q); err != nil {
 		return nil, Pagination{}, err
 	}
 
@@ -196,23 +156,8 @@ func (c *Client) GetGroupUsers(ctx context.Context, groupId string, pageSize int
 	url := fmt.Sprint(c.baseUrl, "/sites/", c.siteId, "/groups/", groupId, "/users")
 	q := paginationQuery(pageSize, pageNumber)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, Pagination{}, err
-	}
-
-	req.URL.RawQuery = q.Encode()
-	req.Header.Add("X-Tableau-Auth", fmt.Sprint(c.authToken))
-	req.Header.Add("accept", "application/json")
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, Pagination{}, err
-	}
-
-	defer resp.Body.Close()
-
 	var res usersResponse
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+	if err := c.doRequest(ctx, url, &res, q); err != nil {
 		return nil, Pagination{}, err
 	}
 
@@ -324,9 +269,26 @@ func (c *Client) GetPaginatedGroupUsers(ctx context.Context, groupId string) ([]
 // VerifyUser returns current logged in user.
 func (c *Client) VerifyUser(ctx context.Context) error {
 	url := fmt.Sprint(c.baseUrl, "/sites/", c.siteId, "/users/", c.currentUserId)
+
+	var res struct {
+		User User `json:"user"`
+	}
+
+	if err := c.doRequest(ctx, url, &res, nil); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) doRequest(ctx context.Context, url string, res interface{}, q url.Values) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return err
+	}
+
+	if q != nil {
+		req.URL.RawQuery = q.Encode()
 	}
 
 	req.Header.Add("X-Tableau-Auth", fmt.Sprint(c.authToken))
@@ -338,9 +300,6 @@ func (c *Client) VerifyUser(ctx context.Context) error {
 
 	defer resp.Body.Close()
 
-	var res struct {
-		User User `json:"user"`
-	}
 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
 		return err
 	}

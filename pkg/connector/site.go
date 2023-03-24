@@ -56,7 +56,7 @@ func siteResource(site tableau.Site) (*v2.Resource, error) {
 
 func (o *siteResourceType) List(ctx context.Context, _ *v2.ResourceId, _ *pagination.Token) ([]*v2.Resource, string, annotations.Annotations, error) {
 	var rv []*v2.Resource
-	site, _, err := o.client.GetSite(ctx)
+	site, err := o.client.GetSite(ctx)
 	if err != nil {
 		return nil, "", nil, err
 	}
