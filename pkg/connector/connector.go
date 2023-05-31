@@ -64,6 +64,7 @@ func New(ctx context.Context, baseUrl string, contentUrl string, personalAccessT
 func (tb *Tableau) Metadata(ctx context.Context) (*v2.ConnectorMetadata, error) {
 	return &v2.ConnectorMetadata{
 		DisplayName: "Tableau",
+		Description: "Connector syncing users, groups and sites from Tableau to Baton.",
 	}, nil
 }
 
