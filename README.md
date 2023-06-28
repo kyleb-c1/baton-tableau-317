@@ -63,16 +63,21 @@ Available Commands:
   help               Help about any command
 
 Flags:
-      --access-token-name string     Name of the personal access token used to connect to the Tableau API. ($BATON_ACCESS_TOKEN_NAME)
-      --access-token-secret string   Secret of the personal access token used to connect to the Tableau API. ($BATON_ACCESS_TOKEN_SECRET)
-      --content-url string           On server it's referred as Site ID, on Cloud it appears after /site/ in the Browser address bar. ($BATON_CONTENT_URL)
-  -f, --file string                  The path to the c1z file to sync with ($BATON_FILE) (default "sync.c1z")
-  -h, --help                         help for baton-tableau
-      --log-format string            The output format for logs: json, console ($BATON_LOG_FORMAT) (default "json")
-      --log-level string             The log level: debug, info, warn, error ($BATON_LOG_LEVEL) (default "info")
-      --server-path string           Base url of your server or Tableau Cloud. ($BATON_SERVER_PATH)
-  -v, --version                      version for baton-tableau
+      --access-token-name string      Name of the personal access token used to connect to the Tableau API. ($BATON_ACCESS_TOKEN_NAME)
+      --access-token-secret string    Secret of the personal access token used to connect to the Tableau API. ($BATON_ACCESS_TOKEN_SECRET)
+      --client-id string              The client ID used to authenticate with ConductorOne ($BATON_CLIENT_ID)
+      --client-secret string          The client secret used to authenticate with ConductorOne ($BATON_CLIENT_SECRET)
+  -f, --file string                   The path to the c1z file to sync with ($BATON_FILE) (default "sync.c1z")
+      --grant-entitlement string      The entitlement to grant to the supplied principal ($BATON_GRANT_ENTITLEMENT)
+      --grant-principal string        The resource to grant the entitlement to ($BATON_GRANT_PRINCIPAL)
+      --grant-principal-type string   The resource type of the principal to grant the entitlement to ($BATON_GRANT_PRINCIPAL_TYPE)
+  -h, --help                          help for baton-tableau
+      --log-format string             The output format for logs: json, console ($BATON_LOG_FORMAT) (default "json")
+      --log-level string              The log level: debug, info, warn, error ($BATON_LOG_LEVEL) (default "info")
+      --revoke-grant string           The grant to revoke ($BATON_REVOKE_GRANT)
+      --server-path string            Base url of your server or Tableau Cloud. ($BATON_SERVER_PATH)
+      --site-id string                On server it's referred as Site ID, on cloud it appears after /site/ in the Browser address bar. ($BATON_SITE_ID)
+  -v, --version                       version for baton-tableau
 
 Use "baton-tableau [command] --help" for more information about a command.
-
 ```
