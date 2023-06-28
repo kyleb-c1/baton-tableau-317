@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"github.com/ConductorOne/baton-tableau/pkg/tableau"
 	v2 "github.com/conductorone/baton-sdk/pb/c1/connector/v2"
 	"github.com/conductorone/baton-sdk/pkg/annotations"
 	"github.com/conductorone/baton-sdk/pkg/pagination"
 	rs "github.com/conductorone/baton-sdk/pkg/types/resource"
+	"github.com/conductorone/baton-tableau/pkg/tableau"
 )
 
 type userResourceType struct {
