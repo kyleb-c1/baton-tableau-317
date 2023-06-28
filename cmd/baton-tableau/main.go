@@ -6,10 +6,10 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/ConductorOne/baton-tableau/pkg/connector"
 	"github.com/conductorone/baton-sdk/pkg/cli"
 	"github.com/conductorone/baton-sdk/pkg/connectorbuilder"
 	"github.com/conductorone/baton-sdk/pkg/types"
+	"github.com/conductorone/baton-tableau/pkg/connector"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"go.uber.org/zap"
 )

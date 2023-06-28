@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConductorOne/baton-tableau/pkg/tableau"
 	v2 "github.com/conductorone/baton-sdk/pb/c1/connector/v2"
 	"github.com/conductorone/baton-sdk/pkg/annotations"
 	"github.com/conductorone/baton-sdk/pkg/pagination"
 	ent "github.com/conductorone/baton-sdk/pkg/types/entitlement"
 	grant "github.com/conductorone/baton-sdk/pkg/types/grant"
 	rs "github.com/conductorone/baton-sdk/pkg/types/resource"
+	"github.com/conductorone/baton-tableau/pkg/tableau"
 )
 
 const memberEntitlement = "member"
