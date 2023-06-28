@@ -43,7 +43,7 @@ func getConnector(ctx context.Context, cfg *config) (types.ConnectorServer, erro
 		l.Error("error creating base url", zap.Error(err))
 	}
 
-	cb, err := connector.New(ctx, baseUrl, cfg.ContentUrl, cfg.AccessTokenName, cfg.AccessTokenSecret)
+	cb, err := connector.New(ctx, baseUrl, cfg.SiteID, cfg.AccessTokenName, cfg.AccessTokenSecret)
 	if err != nil {
 		l.Error("error creating connector", zap.Error(err))
 		return nil, err
