@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -112,7 +113,7 @@ func (c *Client) GetSite(ctx context.Context) (Site, error) {
 	var res struct {
 		Site Site `json:"site"`
 	}
-	if err := c.doRequest(ctx, url, &res, nil); err != nil {
+	if err := c.doRequest(ctx, url, &res, nil, nil, http.MethodGet); err != nil {
 		return Site{}, err
 	}
 
@@ -125,7 +126,7 @@ func (c *Client) GetUsers(ctx context.Context, pageSize int, pageNumber int) ([]
 	q := paginationQuery(pageSize, pageNumber)
 
 	var res usersResponse
-	if err := c.doRequest(ctx, url, &res, q); err != nil {
+	if err := c.doRequest(ctx, url, &res, q, nil, http.MethodGet); err != nil {
 		return nil, Pagination{}, err
 	}
 
@@ -144,7 +145,7 @@ func (c *Client) GetGroups(ctx context.Context, pageSize int, pageNumber int) ([
 		} `json:"groups"`
 	}
 
-	if err := c.doRequest(ctx, url, &res, q); err != nil {
+	if err := c.doRequest(ctx, url, &res, q, nil, http.MethodGet); err != nil {
 		return nil, Pagination{}, err
 	}
 
@@ -157,7 +158,7 @@ func (c *Client) GetGroupUsers(ctx context.Context, groupId string, pageSize int
 	q := paginationQuery(pageSize, pageNumber)
 
 	var res usersResponse
-	if err := c.doRequest(ctx, url, &res, q); err != nil {
+	if err := c.doRequest(ctx, url, &res, q, nil, http.MethodGet); err != nil {
 		return nil, Pagination{}, err
 	}
 
@@ -274,15 +275,50 @@ func (c *Client) VerifyUser(ctx context.Context) error {
 		User User `json:"user"`
 	}
 
-	if err := c.doRequest(ctx, url, &res, nil); err != nil {
+	if err := c.doRequest(ctx, url, &res, nil, nil, http.MethodGet); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c *Client) doRequest(ctx context.Context, url string, res interface{}, q url.Values) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+// AddUserToGroup adds user to a group.
+func (c *Client) AddUserToGroup(ctx context.Context, groupId, userId string) error {
+	url := fmt.Sprint(c.baseUrl, "/sites/", c.siteId, "/groups/", groupId, "/users")
+	var res struct {
+		User User `json:"user"`
+	}
+
+	requestBody, err := json.Marshal(map[string]interface{}{
+		"user": map[string]interface{}{
+			"id": userId,
+		},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if err := c.doRequest(ctx, url, &res, nil, requestBody, http.MethodPost); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// RemoveUserFromGroup removes user from a group.
+func (c *Client) RemoveUserFromGroup(ctx context.Context, groupId, userId string) error {
+	url := fmt.Sprint(c.baseUrl, "/sites/", c.siteId, "/groups/", groupId, "/users/", userId)
+
+	if err := c.doRequest(ctx, url, nil, nil, nil, http.MethodDelete); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) doRequest(ctx context.Context, url string, res interface{}, q url.Values, body []byte, method string) error {
+	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -292,7 +328,8 @@ func (c *Client) doRequest(ctx context.Context, url string, res interface{}, q u
 	}
 
 	req.Header.Add("X-Tableau-Auth", fmt.Sprint(c.authToken))
-	req.Header.Add("accept", "application/json")
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err
@@ -300,7 +337,20 @@ func (c *Client) doRequest(ctx context.Context, url string, res interface{}, q u
 
 	defer resp.Body.Close()
 
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if len(b) == 0 && resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return nil
+	}
+
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("tableau-connector: request failed with status code %d: %s", resp.StatusCode, string(b))
+	}
+
+	if err := json.Unmarshal(b, &res); err != nil {
 		return err
 	}
 
