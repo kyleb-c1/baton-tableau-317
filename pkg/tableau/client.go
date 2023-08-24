@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -337,21 +336,14 @@ func (c *Client) doRequest(ctx context.Context, url string, res interface{}, q u
 
 	defer resp.Body.Close()
 
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
+	if resp.StatusCode >= 300 {
+		return fmt.Errorf("tableau-connector: request failed with status code %d", resp.StatusCode)
 	}
 
-	if len(b) == 0 && resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		return nil
-	}
-
-	if resp.StatusCode >= 400 {
-		return fmt.Errorf("tableau-connector: request failed with status code %d: %s", resp.StatusCode, string(b))
-	}
-
-	if err := json.Unmarshal(b, &res); err != nil {
-		return err
+	if method != http.MethodDelete {
+		if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+			return err
+		}
 	}
 
 	return nil
