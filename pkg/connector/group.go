@@ -11,6 +11,8 @@ import (
 	grant "github.com/conductorone/baton-sdk/pkg/types/grant"
 	rs "github.com/conductorone/baton-sdk/pkg/types/resource"
 	"github.com/conductorone/baton-tableau/pkg/tableau"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
+	"go.uber.org/zap"
 )
 
 const memberEntitlement = "member"
@@ -115,6 +117,49 @@ func (g *groupResourceType) Grants(ctx context.Context, resource *v2.Resource, t
 	}
 
 	return rv, "", nil, nil
+}
+
+func (o *groupResourceType) Grant(ctx context.Context, principal *v2.Resource, entitlement *v2.Entitlement) (annotations.Annotations, error) {
+	l := ctxzap.Extract(ctx)
+
+	if principal.Id.ResourceType != resourceTypeUser.Id {
+		l.Warn(
+			"baton-tableau: only users can be granted group membership",
+			zap.String("principal_type", principal.Id.ResourceType),
+			zap.String("principal_id", principal.Id.Resource),
+		)
+		return nil, fmt.Errorf("baton-tableau: only users can be granted group membership")
+	}
+
+	err := o.client.AddUserToGroup(ctx, entitlement.Resource.Id.Resource, principal.Id.Resource)
+	if err != nil {
+		return nil, fmt.Errorf("baton-tableau: failed to add user to group: %w", err)
+	}
+
+	return nil, nil
+}
+
+func (o *groupResourceType) Revoke(ctx context.Context, grant *v2.Grant) (annotations.Annotations, error) {
+	l := ctxzap.Extract(ctx)
+
+	entitlement := grant.Entitlement
+	principal := grant.Principal
+
+	if principal.Id.ResourceType != resourceTypeUser.Id {
+		l.Warn(
+			"baton-tableau: only users can have group membership revoked",
+			zap.String("principal_type", principal.Id.ResourceType),
+			zap.String("principal_id", principal.Id.Resource),
+		)
+		return nil, fmt.Errorf("baton-tableau: only users can have group membership revoked")
+	}
+
+	err := o.client.RemoveUserFromGroup(ctx, entitlement.Resource.Id.Resource, principal.Id.Resource)
+	if err != nil {
+		return nil, fmt.Errorf("baton-tableau: failed to remove user from group: %w", err)
+	}
+
+	return nil, nil
 }
 
 func groupBuilder(client *tableau.Client) *groupResourceType {
