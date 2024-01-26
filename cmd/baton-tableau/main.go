@@ -38,7 +38,7 @@ func main() {
 
 func getConnector(ctx context.Context, cfg *config) (types.ConnectorServer, error) {
 	l := ctxzap.Extract(ctx)
-	baseUrl, err := url.JoinPath("https://", cfg.ServerPath, "/api/3.19")
+	baseUrl, err := url.JoinPath("https://", cfg.ServerPath, "/api/3.17")
 	if err != nil {
 		l.Error("error creating base url", zap.Error(err))
 	}
